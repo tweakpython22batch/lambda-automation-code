@@ -1,33 +1,12 @@
 version: 0.2
-
-env:
-  variables:
-    LAMBDA_ZIP: lambda.zip
 phases:
   install:
     runtime-versions:
       python: 3.9
-    commands:
-      - echo "Install prerequisites"
-      - pip install --upgrade awscli   # ensure aws cli available
-  pre_build:
-    commands:
-      - echo "Pre build phase"
   build:
     commands:
-      - echo "Zipping lambda code..."
-      - cd $CODEBUILD_SRC_DIR
-      - zip -r $LAMBDA_ZIP src/*
-      - echo "Packaging CloudFormation template..."
-      # Use the pipeline artifact bucket (CodeBuild will have IAM rights)
-      # Note: The PIPELINE_ARTIFACT_BUCKET variable is set by CFN when creating the CodeBuild project.
-      - aws cloudformation package \
-          --template-file lambda_template.yaml \
-          --s3-bucket $CODEBUILD_ARTIFACT_BUCKET \
-          --output-template-file packaged.yaml
+      - pip install -r requirements.txt -t .
+      - zip -r lambda.zip .
 artifacts:
   files:
-    - packaged.yaml
-    - $LAMBDA_ZIP
-  discard-paths: yes
-
+    - lambda.zip
